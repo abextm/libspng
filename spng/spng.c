@@ -5109,6 +5109,22 @@ int spng_set_png_file(spng_ctx *ctx, FILE *file)
     return spng_set_png_stream(ctx, file_read_fn, file);
 }
 
+int spng_close_png_file(spng_ctx *ctx)
+{
+    if ((ctx->write_fn == file_write_fn || ctx->read_fn == file_read_fn) && ctx->stream_user_ptr)
+    {
+        fclose((FILE*) ctx->stream_user_ptr);
+
+        ctx->write_fn = NULL;
+        ctx->read_fn = NULL;
+        ctx->stream_user_ptr = NULL;
+
+        return 0;
+    }
+
+    return SPNG_EINVAL;
+}
+
 void *spng_get_png_buffer(spng_ctx *ctx, size_t *len, int *error)
 {
     int tmp = 0;
