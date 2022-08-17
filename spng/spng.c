@@ -992,6 +992,11 @@ static int write_chunk(spng_ctx *ctx, const uint8_t type[4], const void *data, s
     return finish_chunk(ctx);
 }
 
+int spng_write_chunk(spng_ctx *ctx, const uint8_t type[4], const void *data, size_t length)
+{
+    return write_chunk(ctx, type, data, length);
+}
+
 static int write_iend(spng_ctx *ctx)
 {
     unsigned char iend_chunk[12] = { 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130 };
@@ -4733,7 +4738,17 @@ int spng_encode_chunks(spng_ctx *ctx)
     return 0;
 }
 
+void spng_set_state(spng_ctx *ctx, int state)
+{
+    ctx->state = (enum spng_state) state;
+}
+
 int spng_encode_image(spng_ctx *ctx, const void *img, size_t len, int fmt, int flags)
+{
+    return spng_encode_image_stride(ctx, img, 0, len, fmt, flags);
+}
+
+SPNG_API int spng_encode_image_stride(spng_ctx *ctx, const void *img, size_t stride, size_t len, int fmt, int flags)
 {
     if(ctx == NULL) return 1;
     if(!ctx->state) return SPNG_EBADSTATE;
@@ -4749,15 +4764,16 @@ int spng_encode_image(spng_ctx *ctx, const void *img, size_t len, int fmt, int f
 
     ret = calculate_image_width(ihdr, fmt, &ctx->image_width);
     if(ret) return encode_err(ctx, ret);
+    if(stride == 0) stride = ctx->image_width;
 
-    if(ctx->image_width > SIZE_MAX / ihdr->height) ctx->image_size = 0; /* overflow */
-    else ctx->image_size = ctx->image_width * ihdr->height;
+    if(stride > SIZE_MAX / ihdr->height) ctx->image_size = 0; /* overflow */
+    else ctx->image_size = stride * ihdr->height;
 
     if( !(flags & SPNG_ENCODE_PROGRESSIVE) )
     {
         if(img == NULL) return 1;
         if(!ctx->image_size) return SPNG_EOVERFLOW;
-        if(len != ctx->image_size) return SPNG_EBUFSIZ;
+        if(len < ctx->image_size || stride < ctx->image_width) return SPNG_EBUFSIZ;
     }
 
     ret = spng_encode_chunks(ctx);
@@ -4863,7 +4879,7 @@ int spng_encode_image(spng_ctx *ctx, const void *img, size_t len, int fmt, int f
 
     do
     {
-        size_t ioffset = ri->row_num * ctx->image_width;
+        size_t ioffset = ri->row_num * stride;
 
         ret = encode_row(ctx, (unsigned char*)img + ioffset, ctx->image_width);
 

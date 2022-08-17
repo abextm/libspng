@@ -476,11 +476,14 @@ SPNG_API int spng_get_row_info(spng_ctx *ctx, struct spng_row_info *row_info);
 
 /* Encode */
 SPNG_API int spng_encode_image(spng_ctx *ctx, const void *img, size_t len, int fmt, int flags);
+SPNG_API int spng_encode_image_stride(spng_ctx *ctx, const void *img, size_t stride, size_t len, int fmt, int flags);
 
 /* Progressive encode */
 SPNG_API int spng_encode_scanline(spng_ctx *ctx, const void *scanline, size_t len);
 SPNG_API int spng_encode_row(spng_ctx *ctx, const void *row, size_t len);
 SPNG_API int spng_encode_chunks(spng_ctx *ctx);
+SPNG_API void spng_set_state(spng_ctx *ctx, int state);
+SPNG_API int spng_write_chunk(spng_ctx *ctx, const uint8_t type[4], const void *data, size_t length);
 
 SPNG_API int spng_get_ihdr(spng_ctx *ctx, struct spng_ihdr *ihdr);
 SPNG_API int spng_get_plte(spng_ctx *ctx, struct spng_plte *plte);
