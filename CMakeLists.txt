@@ -9,7 +9,7 @@ set(SPNG_VERSION ${SPNG_MAJOR}.${SPNG_MINOR}.${SPNG_REVISION})
 
 option(ENABLE_OPT "Enable architecture-specific optimizations" ON)
 option(SPNG_SHARED "Build shared lib" ON)
-option(SPNG_STATIC "Build static lib" ON)
+option(SPNG_STATIC "Build static lib" OFF)
 option(BUILD_EXAMPLES "Build examples" ON)
 
 include(GNUInstallDirs)
@@ -22,12 +22,15 @@ endif()
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIRS})
 
-set(spng_SOURCES spng/spng.c)
+find_package(JNI REQUIRED)
+include_directories(${JNI_INCLUDE_DIRS})
+
+set(spng_SOURCES spng/spng.c spng/spng_java.c)
 
 if(NOT CMAKE_HOST_WIN32)
-    set(spng_LIBS -lm ${ZLIB_LIBRARIES})
+    set(spng_LIBS -lm ${ZLIB_LIBRARIES} ${JNI_LIBRARIES})
 else()
-    set(spng_LIBS ${ZLIB_LIBRARIES})
+    set(spng_LIBS ${ZLIB_LIBRARIES} ${JNI_LIBRARIES})
 endif()
 
 if(NOT ENABLE_OPT)
@@ -36,6 +39,9 @@ endif()
 
 if(SPNG_SHARED)
     add_library(spng SHARED ${spng_SOURCES})
+    if (MSVC)
+        set_property(TARGET spng PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
+    endif()
     target_link_libraries(spng ${spng_LIBS})
     install(TARGETS spng DESTINATION lib)
 
