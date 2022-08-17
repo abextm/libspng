@@ -4577,6 +4577,20 @@ static int encode_scanline(spng_ctx *ctx, const void *scanline, size_t len)
 
     if(len < scanline_width - 1) return SPNG_EINTERNAL;
 
+    if(scanline != ctx->scanline)
+    {
+        const uint8_t *src = scanline;
+        uint8_t *dst = ctx->scanline;
+        scanline = ctx->scanline;
+        for (size_t i = 0; i < scanline_width - 1; i += 4, src += 4, dst += 4)
+        {
+            dst[0] = src[2];
+            dst[1] = src[1];
+            dst[2] = src[0];
+            dst[3] = src[3];
+        }
+    }
+
     /* encode_row() interlaces directly to ctx->scanline */
     if(scanline != ctx->scanline) memcpy(ctx->scanline, scanline, scanline_width - 1);
 
