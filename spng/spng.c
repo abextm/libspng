@@ -4781,7 +4781,7 @@ SPNG_API int spng_encode_image_stride(spng_ctx *ctx, const void *img, size_t str
     if(stride == 0) stride = ctx->image_width;
 
     if(stride > SIZE_MAX / ihdr->height) ctx->image_size = 0; /* overflow */
-    else ctx->image_size = stride * ihdr->height;
+    else ctx->image_size = stride * ihdr->height - (stride - ctx->image_width);
 
     if( !(flags & SPNG_ENCODE_PROGRESSIVE) )
     {
