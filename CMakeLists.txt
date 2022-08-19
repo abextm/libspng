@@ -30,9 +30,9 @@ include_directories(${JNI_INCLUDE_DIRS})
 set(spng_SOURCES spng/spng.c spng/spng_java.c)
 
 if(NOT CMAKE_HOST_WIN32)
-    set(spng_LIBS -lm ${ZLIB_LIBRARIES} ${JNI_LIBRARIES})
+    set(spng_LIBS -lm ${ZLIB_LIBRARIES})
 else()
-    set(spng_LIBS ${ZLIB_LIBRARIES} ${JNI_LIBRARIES})
+    set(spng_LIBS ${ZLIB_LIBRARIES})
 endif()
 
 if(NOT ENABLE_OPT)
