@@ -101,7 +101,10 @@ JNIEXPORT jobject JNICALL Java_abex_spng_SPNGEncoder_getBuffer(JNIEnv *env, jobj
 }
 
 JNIEXPORT void JNICALL Java_abex_spng_SPNGEncoder_freeBuffer(JNIEnv *env, jclass clazz, jobject buffer) {
-	free((*env)->GetDirectBufferAddress(env, buffer));
+	void *buf = (*env)->GetDirectBufferAddress(env, buffer);
+	if (buf) {
+		free(buf);
+	}
 }
 
 JNIEXPORT void JNICALL Java_abex_spng_SPNGEncoder_close(JNIEnv *env, jobject self) {
